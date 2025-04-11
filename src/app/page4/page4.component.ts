@@ -30,6 +30,8 @@ export class Page4Component {
     { id: 3, firstName: 'Michael', lastName: 'Johnson', email: 'michael.johnson@example.com', roleId: 2 },
     { id: 4, firstName: 'Emily', lastName: 'Brown', email: 'emily.brown@example.com', roleId: 1 },
     { id: 5, firstName: 'Sandy', lastName: 'Joe', email: 'sandy.brown@example.com', roleId: 2 },
+    { id: 6, firstName: 'Emily', lastName: 'Brown', email: 'emily.brown@example.com', roleId: 1 },
+    { id: 7, firstName: 'Sandy', lastName: 'Joe', email: 'sandy.brown@example.com', roleId: 2 },
   ];
 
   roles = [
