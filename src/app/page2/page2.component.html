@@ -1,0 +1,58 @@
+<div class="container mt-4">
+  <h3 class="mb-3">Data from Page 1:</h3>
+
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Mobile</td>
+        <td>{{ previousData.page1?.mobile }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ previousData.page1?.email }}</td>
+      </tr>
+      <tr>
+        <td>OTP</td>
+        <td>{{ previousData.page1?.otp }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-4">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="name" class="form-label">Name:</label>
+        <input id="name" formControlName="name" class="form-control" />
+        <div *ngIf="form.controls['name'].invalid && form.controls['name'].touched" class="text-danger mt-1">
+          Name must be required.
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="pan" class="form-label">PAN:</label>
+        <input id="pan" formControlName="pan" class="form-control" />
+        <div *ngIf="form.controls['pan'].invalid && form.controls['pan'].touched" class="text-danger mt-1">
+          PAN number must be 10 characters.
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="dob" class="form-label">DOB:</label>
+        <input id="dob" type="date" formControlName="dob" class="form-control" />
+        <div *ngIf="form.controls['dob'].invalid && form.controls['dob'].touched" class="text-danger mt-1">
+          Date is required.
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Next</button>
+  </form>
+</div>

@@ -1,0 +1,60 @@
+<p class="mb-4 h5">Page1 works!</p>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="container">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="mobile" class="form-label">Mobile:</label>
+      <input
+        id="mobile"
+        type="text"
+        formControlName="mobile"
+        class="form-control"
+        (input)="onMobileInput()"
+      />
+      <div
+        *ngIf="form.controls['mobile'].touched && form.controls['mobile'].errors"
+        class="text-danger mt-1"
+      >
+        <div *ngIf="form.controls['mobile'].errors['required']">
+          Mobile number is required.
+        </div>
+        <div *ngIf="form.controls['mobile'].errors['invalidMobile']">
+          Mobile number must be 10 digits and start with 6 to 9.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <label for="email" class="form-label">Email:</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        class="form-control"
+      />
+      <div
+        *ngIf="form.controls['email'].invalid && form.controls['email'].touched"
+        class="text-danger mt-1"
+      >
+        Enter a valid email.
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3" *ngIf="otpVisible">
+    <div class="col-md-6">
+      <label for="otp" class="form-label">OTP:</label>
+      <input id="otp" type="text" formControlName="otp" class="form-control" />
+      <div
+        *ngIf="form.controls['otp'].invalid && form.controls['otp'].touched"
+        class="text-danger mt-1"
+      >
+        OTP must be 1234.
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+    Next
+  </button>
+</form>

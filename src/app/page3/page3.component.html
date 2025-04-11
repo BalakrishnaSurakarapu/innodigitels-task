@@ -1,0 +1,99 @@
+<div class="container mt-4">
+  <p class="h5 mb-4">Page 3 works!</p>
+
+  <h3 class="mb-3">Data from Page 1:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Mobile</td>
+        <td>{{ previousData.page1?.mobile }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ previousData.page1?.email }}</td>
+      </tr>
+      <tr>
+        <td>OTP</td>
+        <td>{{ previousData.page1?.otp }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="mb-3 mt-4">Data from Page 2:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>{{ previousData.page2?.name }}</td>
+      </tr>
+      <tr>
+        <td>PAN</td>
+        <td>{{ previousData.page2?.pan }}</td>
+      </tr>
+      <tr>
+        <td>DOB</td>
+        <td>{{ previousData.page2?.dob }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="my-4">Page 3 Component</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div formArrayName="users">
+      <div
+        *ngFor="let user of users.controls; let i = index"
+        [formGroupName]="i"
+        class="border p-3 mb-3 rounded shadow-sm bg-light"
+      >
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="firstName" class="form-label">First Name:</label>
+            <input id="firstName" formControlName="firstName" class="form-control" />
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label for="lastName" class="form-label">Last Name:</label>
+            <input id="lastName" formControlName="lastName" class="form-control" />
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input id="email" formControlName="email" class="form-control" />
+          </div>
+        </div>
+
+        <div *ngIf="users.length > 1 && i !== 0">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            (click)="removeUser(i)"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <button type="button" class="btn btn-outline-primary me-2" (click)="addUser()">
+        Add User
+      </button>
+      <button type="submit" class="btn btn-success" [disabled]="form.invalid">
+        Next
+      </button>
+    </div>
+  </form>
+</div>
