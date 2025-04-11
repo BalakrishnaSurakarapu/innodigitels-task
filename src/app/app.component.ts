@@ -10,5 +10,5 @@ import { ParentComponent } from "./parent/parent.component";
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'shirisha_innodigital';
+  title = 'innodigital';
 }
