@@ -1,0 +1,760 @@
+/* 
+child.html:
+---------------
+<div class="container mt-4">
+  <h2 class="mb-4">Child Component</h2>
+
+  <!-- Edit Form -->
+  <div *ngIf="selectedPost" class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">Edit Post</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label for="title" class="form-label">Title:</label>
+          <input id="title" formControlName="title" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+          <label for="body" class="form-label">Body:</label>
+          <textarea id="body" formControlName="body" rows="4" class="form-control"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="submit" class="btn btn-success">Save</button>
+          <button type="button" (click)="selectedPost = null" class="btn btn-secondary">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-3">
+    <label for="search" class="form-label">Search:</label>
+    <input
+      id="search"
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Search posts"
+      class="form-control"
+    />
+  </div>
+
+  <!-- Posts Table -->
+  <table
+    appSearch
+    [appSearch]="searchTerm"
+    [searchData]="posts"
+    class="table table-striped table-bordered"
+  >
+    <thead class="table-light">
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Body</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let post of posts">
+        <td>{{ post.id }}</td>
+        <td>{{ post.title }}</td>
+        <td>{{ post.body }}</td>
+        <td>
+          <div class="btn-group" role="group">
+            <button (click)="onEdit(post)" class="btn btn-sm btn-primary">Edit</button>
+            <button (click)="onDelete(post.id)" class="btn btn-sm btn-danger">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+------------------ts---------------
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SearchDirective } from '../search.directive';
+
+@Component({
+  selector: 'app-child',
+  standalone: true,
+  imports: [CommonModule, FormsModule,SearchDirective,ReactiveFormsModule],
+  templateUrl: './child.component.html',
+  styleUrl: './child.component.css'
+})
+export class ChildComponent {
+  @Input() posts: any[] = [];
+  selectedPost: any = null;
+  editForm: FormGroup;
+  searchTerm: string = '';
+  constructor(private http: HttpClient,private fb:FormBuilder){
+    this.editForm = this.fb.group({
+      title: [''],
+      body: [''],
+    });
+  }
+  onEdit(post: any): void {
+    this.selectedPost = post;
+
+    this.editForm.patchValue({
+      id:post.id,
+      title: post.title,
+      body: post.body,
+    });
+  }
+  onSubmit(): void {
+    if (this.selectedPost) {
+      const updatedPost = { ...this.selectedPost, ...this.editForm.value };
+
+      this.http
+        .put(`https://jsonplaceholder.typicode.com/posts/${this.selectedPost.id}`, updatedPost)
+        .subscribe((response) => {
+          console.log('Updated Post:', response);
+
+          const index = this.posts.findIndex((post) => post.id === this.selectedPost.id);
+          if (index !== -1) {
+            this.posts[index] = updatedPost;
+          }
+
+          this.selectedPost = null;
+          this.editForm.reset();
+        });
+    }
+  }
+
+  onDelete(id: number): void {
+    this.http.delete(`https://jsonplaceholder.typicode.com/posts/${id}`).subscribe(() => {
+      this.posts = this.posts.filter((post) => post.id !== id);
+    });
+  }
+
+}
+-------------parent.html--------
+<h1>Parent Component</h1>
+<app-child [posts]="Posts"></app-child>
+--------------ts---------------
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Component } from '@angular/core';
+import { ChildComponent } from '../child/child.component';
+
+@Component({
+  selector: 'app-parent',
+  standalone: true,
+  imports: [ChildComponent,HttpClientModule],
+  templateUrl: './parent.component.html',
+  styleUrl: './parent.component.css'
+})
+export class ParentComponent {
+  Posts: any[] = [];
+
+  constructor(private http: HttpClient) {
+   
+  }
+  ngOnInit(): void {
+    this.http.get('https://jsonplaceholder.typicode.com/posts')
+      .subscribe((data: any) =>this.Posts = data.slice(0, 10));
+        //  this.Posts = data);
+      console.log(this.Posts,'list')
+  }
+}
+-----------------------app.component--------
+<router-outlet />
+---------------ts----------
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { ParentComponent } from "./parent/parent.component";
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, ParentComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
+})
+export class AppComponent {
+  title = 'innodigital';
+}
+---------------------------app.routes.ts----
+import { Routes } from '@angular/router';
+import { Page1Component } from './page1/page1.component';
+import { Page2Component } from './page2/page2.component';
+import { Page4Component } from './page4/page4.component';
+import { Page3Component } from './page3/page3.component';
+import { ParentComponent } from './parent/parent.component';
+import { ChildComponent } from './child/child.component';
+
+export const routes: Routes = [
+    { path: '', redirectTo: 'page1', pathMatch: 'full' },
+    {path: 'page1', component:Page1Component},
+    {path: 'page2', component:Page2Component},
+    {path: 'page3', component:Page3Component},
+    {path: 'page4', component:Page4Component},
+    {path: 'parent', component:ParentComponent},
+    {path: 'child', component:ChildComponent}
+];
+--------------data.service.ts------
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DataService {
+
+  constructor() { }
+  private formData: any = {
+    page1: null,
+    page2: null,
+    page3: null,
+  };
+
+  setPageData(page: string, data: any) {
+    this.formData[page] = data;
+  }
+
+  getFormData() {
+    return this.formData;
+  }
+
+}
+-------------------search.directive.ts--------
+import { Directive, ElementRef, Input, Renderer2, SimpleChanges } from '@angular/core';
+
+@Directive({
+  selector: '[appSearch]',
+  standalone: true
+})
+export class SearchDirective {
+
+  @Input() appSearch!: string; 
+  @Input() searchData!: any[]; 
+
+  constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['appSearch'] || changes['searchData']) {
+      this.applyFilter();
+    }
+  }
+
+  private applyFilter(): void {
+    const searchTerm = this.appSearch?.toLowerCase() || '';
+    const rows = this.el.nativeElement.querySelectorAll('tr'); 
+
+    rows.forEach((row: HTMLElement, index: number) => {
+      if (index === 0) return; 
+      const cells = row.querySelectorAll('td'); 
+      const rowText = Array.from(cells)
+        .map((cell) => cell.textContent?.toLowerCase() || '')
+        .join(' '); 
+      if (rowText.includes(searchTerm)) {
+        this.renderer.setStyle(row, 'display', ''); 
+      } else {
+        this.renderer.setStyle(row, 'display', 'none'); 
+      }
+    });
+  }
+
+}
+---------page1.html------------
+<p class="mb-4 h5">Page1 works!</p>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="container">
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label for="mobile" class="form-label">Mobile:</label>
+      <input
+        id="mobile"
+        type="text"
+        formControlName="mobile"
+        class="form-control"
+        (input)="onMobileInput()"
+      />
+      <div
+        *ngIf="form.controls['mobile'].touched && form.controls['mobile'].errors"
+        class="text-danger mt-1"
+      >
+        <div *ngIf="form.controls['mobile'].errors['required']">
+          Mobile number is required.
+        </div>
+        <div *ngIf="form.controls['mobile'].errors['invalidMobile']">
+          Mobile number must be 10 digits and start with 6 to 9.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <label for="email" class="form-label">Email:</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        class="form-control"
+      />
+      <div
+        *ngIf="form.controls['email'].invalid && form.controls['email'].touched"
+        class="text-danger mt-1"
+      >
+        Enter a valid email.
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3" *ngIf="otpVisible">
+    <div class="col-md-6">
+      <label for="otp" class="form-label">OTP:</label>
+      <input id="otp" type="text" formControlName="otp" class="form-control" />
+      <div
+        *ngIf="form.controls['otp'].invalid && form.controls['otp'].touched"
+        class="text-danger mt-1"
+      >
+        OTP must be 1234.
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+    Next
+  </button>
+</form>
+---------------ts------------
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DataService } from '../data.service';
+
+@Component({
+  selector: 'app-page1',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './page1.component.html',
+  styleUrl: './page1.component.css'
+})
+export class Page1Component {
+  form: FormGroup;
+  otpVisible = false;
+  constructor(private fb: FormBuilder, private router: Router,private dataService: DataService) {
+    this.form = this.fb.group({
+      mobile: ['', [Validators.required,this.mobileValidator, Validators.pattern(/^[6-9]\d{9}$/)]], ///^\d{10}$
+      email: ['', [Validators.required, Validators.email]],
+      otp: ['1234', [Validators.required, Validators.pattern(/^1234$/)]],
+    });
+  }
+  onMobileInput() {
+    if (this.form.controls['mobile'].valid) {
+      this.otpVisible = true;
+    }
+  }
+  mobileValidator(control: AbstractControl) {
+    const value = control.value;
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!value) return null;
+    return mobileRegex.test(value) ? null : { invalidMobile: true };
+  }
+  onSubmit() {
+    if (this.form.valid) {
+      this.dataService.setPageData('page1', this.form.value);
+      this.router.navigate(['/page2'],
+      { state: { page1Data: this.form.value } });
+    }
+  }
+}
+======page2.html-------------
+<div class="container mt-4">
+  <h3 class="mb-3">Data from Page 1:</h3>
+
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Mobile</td>
+        <td>{{ previousData.page1?.mobile }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ previousData.page1?.email }}</td>
+      </tr>
+      <tr>
+        <td>OTP</td>
+        <td>{{ previousData.page1?.otp }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-4">
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="name" class="form-label">Name:</label>
+        <input id="name" formControlName="name" class="form-control" />
+        <div *ngIf="form.controls['name'].invalid && form.controls['name'].touched" class="text-danger mt-1">
+          Name must be required.
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label for="pan" class="form-label">PAN:</label>
+        <input id="pan" formControlName="pan" class="form-control" />
+        <div *ngIf="form.controls['pan'].invalid && form.controls['pan'].touched" class="text-danger mt-1">
+          PAN number must be 10 characters.
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="dob" class="form-label">DOB:</label>
+        <input id="dob" type="date" formControlName="dob" class="form-control" />
+        <div *ngIf="form.controls['dob'].invalid && form.controls['dob'].touched" class="text-danger mt-1">
+          Date is required.
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Next</button>
+  </form>
+</div>
+----------ts------------
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DataService } from '../data.service';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-page2',
+  standalone: true,
+  imports: [ReactiveFormsModule,CommonModule],
+  templateUrl: './page2.component.html',
+  styleUrl: './page2.component.css'
+})
+export class Page2Component {
+  form: FormGroup;previousData: any; page1Data: any;
+
+  constructor(private fb: FormBuilder, private router: Router,private dataService: DataService) {
+    this.previousData = this.dataService.getFormData();
+    this.form = this.fb.group({
+      name: ['', Validators.required],
+      pan: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9]{10}$/)]],
+      dob: ['', [Validators.required, Validators.pattern(/^\d{4}-\d{2}-\d{2}$/)]],
+    });
+  }
+
+  onSubmit() {
+    if (this.form.valid) {
+      this.dataService.setPageData('page2', this.form.value);
+      this.router.navigate(['/page3'],
+      );
+    }
+  }
+}
+-----------page3.html-----------
+<div class="container mt-4">
+  <p class="h5 mb-4">Page 3 works!</p>
+
+  <h3 class="mb-3">Data from Page 1:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Mobile</td>
+        <td>{{ previousData.page1?.mobile }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ previousData.page1?.email }}</td>
+      </tr>
+      <tr>
+        <td>OTP</td>
+        <td>{{ previousData.page1?.otp }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="mb-3 mt-4">Data from Page 2:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>{{ previousData.page2?.name }}</td>
+      </tr>
+      <tr>
+        <td>PAN</td>
+        <td>{{ previousData.page2?.pan }}</td>
+      </tr>
+      <tr>
+        <td>DOB</td>
+        <td>{{ previousData.page2?.dob }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="my-4">Page 3 Component</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div formArrayName="users">
+      <div
+        *ngFor="let user of users.controls; let i = index"
+        [formGroupName]="i"
+        class="border p-3 mb-3 rounded shadow-sm bg-light"
+      >
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="firstName" class="form-label">First Name:</label>
+            <input id="firstName" formControlName="firstName" class="form-control" />
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label for="lastName" class="form-label">Last Name:</label>
+            <input id="lastName" formControlName="lastName" class="form-control" />
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input id="email" formControlName="email" class="form-control" />
+          </div>
+        </div>
+
+        <div *ngIf="users.length > 1 && i !== 0">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            (click)="removeUser(i)"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <button type="button" class="btn btn-outline-primary me-2" (click)="addUser()">
+        Add User
+      </button>
+      <button type="submit" class="btn btn-success" [disabled]="form.invalid">
+        Next
+      </button>
+    </div>
+  </form>
+</div>
+-------------ts-------------
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DataService } from '../data.service';
+
+@Component({
+  selector: 'app-page3',
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
+  templateUrl: './page3.component.html',
+  styleUrl: './page3.component.css'
+})
+export class Page3Component {
+  form: FormGroup;
+  page2Data: any;
+  previousData: any;
+  
+  constructor(private fb: FormBuilder, private router: Router,private dataService: DataService) {
+    this.previousData = this.dataService.getFormData();
+    this.form = this.fb.group({
+      users: this.fb.array([
+        this.createUserFormGroup(),
+      ]),
+    });
+  }
+
+  get users(): FormArray {
+    return this.form.get('users') as FormArray;
+  }
+
+  createUserFormGroup(): FormGroup {
+    return this.fb.group({
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]]
+    });
+  }
+
+  addUser() {
+    this.users.push(this.createUserFormGroup());
+  }
+
+  removeUser(index: number) {
+    this.users.removeAt(index);
+  }
+
+  onSubmit() {
+    if (this.form.valid) {
+      this.dataService.setPageData('page3', this.form.value.users);
+      this.router.navigate(['/page4'])
+    }
+  }
+}
+======page4.ts-----------
+<div class="container mt-4">
+  <p class="h5 mb-4">Page 4 works!</p>
+
+  <!-- Page 1 Data -->
+  <h3 class="mb-3">Data from Page 1:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Mobile</td>
+        <td>{{ allData.page1?.mobile }}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{ allData.page1?.email }}</td>
+      </tr>
+      <tr>
+        <td>OTP</td>
+        <td>{{ allData.page1?.otp }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Page 2 Data -->
+  <h3 class="mb-3 mt-4">Data from Page 2:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>{{ allData.page2?.name }}</td>
+      </tr>
+      <tr>
+        <td>PAN</td>
+        <td>{{ allData.page2?.pan }}</td>
+      </tr>
+      <tr>
+        <td>DOB</td>
+        <td>{{ allData.page2?.dob }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Page 3 Data -->
+  <h3 class="mb-3 mt-4">Data from Page 3:</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of allData.page3">
+        <td>{{ user.firstName }}</td>
+        <td>{{ user.lastName }}</td>
+        <td>{{ user.email }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- User Roles -->
+  <h3 class="mb-3 mt-4">User Roles</h3>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of displayedUsers">
+        <td>{{ user.firstName }}</td>
+        <td>{{ user.lastName }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Reusable Component -->
+  <app-parent></app-parent>
+</div>
+-------------ts-----------
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { DataService } from '../data.service';
+import { ParentComponent } from "../parent/parent.component";
+
+@Component({
+  selector: 'app-page4',
+  standalone: true,
+  imports: [CommonModule, ParentComponent],
+  templateUrl: './page4.component.html',
+  styleUrl: './page4.component.css'
+})
+export class Page4Component {
+  formData: any;
+  allData: any;
+  displayedUsers: any[];
+
+  constructor(private dataService: DataService) {
+    this.allData = this.dataService.getFormData();
+    this.displayedUsers = this.users.map(user => ({
+      ...user,
+      role: this.roles.find(role => role.id === user.roleId)?.role || 'Unknown',
+    }));
+  }
+
+ 
+  users = [
+    { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', roleId: 1 },
+    { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@example.com', roleId: 1 },
+    { id: 3, firstName: 'Michael', lastName: 'Johnson', email: 'michael.johnson@example.com', roleId: 2 },
+    { id: 4, firstName: 'Emily', lastName: 'Brown', email: 'emily.brown@example.com', roleId: 1 },
+    { id: 5, firstName: 'Sandy', lastName: 'Joe', email: 'sandy.brown@example.com', roleId: 2 },
+    { id: 6, firstName: 'Emily', lastName: 'Brown', email: 'emily.brown@example.com', roleId: 1 },
+    { id: 7, firstName: 'Sandy', lastName: 'Joe', email: 'sandy.brown@example.com', roleId: 2 },
+  ];
+
+  roles = [
+    { id: 1, role: 'admin' },
+    { id: 2, role: 'employee' },
+  ];
+
+ 
+}
+-----------
+
+
+
+*/

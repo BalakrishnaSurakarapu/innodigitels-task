@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DataService } from '../data.service';
 
@@ -26,12 +26,27 @@ export class Page1Component {
       this.otpVisible = true;
     }
   }
-  mobileValidator(control: AbstractControl) {
-    const value = control.value;
-    const mobileRegex = /^[6-9]\d{9}$/;
-    if (!value) return null;
-    return mobileRegex.test(value) ? null : { invalidMobile: true };
+  // mobileValidator(control: AbstractControl) {
+  //   const value = control.value;
+  //   const mobileRegex = /^[6-9]\d{9}$/;
+  //   if (!value) return null;
+  //   return mobileRegex.test(value) ? null : { invalidMobile: true };
+  // }
+  mobileValidator(control: AbstractControl): ValidationErrors | null {
+    const value: string = control.value;
+    const errors: ValidationErrors = {};
+  
+    if (!value) return null; // Let 'required' validator handle empty input
+    else if (!/^[6-9]/.test(value)) {
+      errors['invalidStart'] = true;
+    }
+    else if (!/^\d{10}$/.test(value)) {
+      errors['invalidLength'] = true;
+    }  
+  
+    return Object.keys(errors).length ? errors : null;
   }
+  
   onSubmit() {
     if (this.form.valid) {
       this.dataService.setPageData('page1', this.form.value);

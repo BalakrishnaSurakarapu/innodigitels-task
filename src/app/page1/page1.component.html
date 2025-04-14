@@ -18,12 +18,17 @@
         <div *ngIf="form.controls['mobile'].errors['required']">
           Mobile number is required.
         </div>
+        <div *ngIf="form.controls['mobile'].errors['invalidLength']">
+          Mobile number must be exactly 10 digits.
+        </div>
+        <div *ngIf="form.controls['mobile'].errors['invalidStart']">
+          Mobile number must start with digits 6 to 9 only.
+        </div>
         <div *ngIf="form.controls['mobile'].errors['invalidMobile']">
-          Mobile number must be 10 digits and start with 6 to 9.
+          Mobile number must be 10 digits and start with 6 to 9 only.
         </div>
       </div>
-    </div>
-
+      </div>
     <div class="col-md-6">
       <label for="email" class="form-label">Email:</label>
       <input
@@ -36,11 +41,19 @@
         *ngIf="form.controls['email'].invalid && form.controls['email'].touched"
         class="text-danger mt-1"
       >
-        Enter a valid email.
+        <div *ngIf="form.controls['email'].errors && form.controls['email'].errors['required']">
+          Email is required.
+        </div>
+        <div *ngIf="form.controls['email'].errors && form.controls['email'].errors['email']">
+          Enter a valid email.
+        </div>
       </div>
     </div>
-  </div>
+</div>
 
+  
+  
+  
   <div class="row mb-3" *ngIf="otpVisible">
     <div class="col-md-6">
       <label for="otp" class="form-label">OTP:</label>
