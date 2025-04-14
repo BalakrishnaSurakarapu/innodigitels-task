@@ -1,25 +1,19 @@
 <div class="container mt-4">
   <p class="h5 mb-4">Page 3 works!</p>
 
-  <h3 class="mb-3">Data from Page 1:</h3>
+  <h3 class="mb-3 mt-4">Data from Page 1:</h3>
   <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th>Field</th>
-        <th>Value</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>OTP</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>Mobile</td>
+      <tr>      
         <td>{{ previousData.page1?.mobile }}</td>
-      </tr>
-      <tr>
-        <td>Email</td>
         <td>{{ previousData.page1?.email }}</td>
-      </tr>
-      <tr>
-        <td>OTP</td>
         <td>{{ previousData.page1?.otp }}</td>
       </tr>
     </tbody>
@@ -29,21 +23,15 @@
   <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th>Field</th>
-        <th>Value</th>
+        <th>Name</th>
+        <th>PAN</th>
+        <th>DOB</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Name</td>
         <td>{{ previousData.page2?.name }}</td>
-      </tr>
-      <tr>
-        <td>PAN</td>
         <td>{{ previousData.page2?.pan }}</td>
-      </tr>
-      <tr>
-        <td>DOB</td>
         <td>{{ previousData.page2?.dob }}</td>
       </tr>
     </tbody>

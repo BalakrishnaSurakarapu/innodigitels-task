@@ -2,25 +2,19 @@
   <p class="h5 mb-4">Page 4 works!</p>
 
   <!-- Page 1 Data -->
-  <h3 class="mb-3">Data from Page 1:</h3>
+  <h3 class="mb-3 mt-4">Data from Page 1:</h3>
   <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th>Field</th>
-        <th>Value</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>OTP</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Mobile</td>
         <td>{{ allData.page1?.mobile }}</td>
-      </tr>
-      <tr>
-        <td>Email</td>
         <td>{{ allData.page1?.email }}</td>
-      </tr>
-      <tr>
-        <td>OTP</td>
         <td>{{ allData.page1?.otp }}</td>
       </tr>
     </tbody>
@@ -31,21 +25,15 @@
   <table class="table table-bordered">
     <thead class="table-light">
       <tr>
-        <th>Field</th>
-        <th>Value</th>
+        <th>Name</th>
+        <th>PAN</th>
+        <th>DOB</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>Name</td>
-        <td>{{ allData.page2?.name }}</td>
-      </tr>
-      <tr>
-        <td>PAN</td>
-        <td>{{ allData.page2?.pan }}</td>
-      </tr>
-      <tr>
-        <td>DOB</td>
+      <tr>      
+        <td>{{ allData.page2?.name }}</td>          
+        <td>{{ allData.page2?.pan }}</td>     
         <td>{{ allData.page2?.dob }}</td>
       </tr>
     </tbody>
